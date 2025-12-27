@@ -3,34 +3,74 @@ from typing import List, Optional
 from uuid import UUID, uuid4
 import uuid
 
-from app.db.base import AbstractedDb
-from app.models.todo import TodoBase, TodoCreate, TodoResponse, TodoUpdate
+from sqlalchemy.orm import Session
+
+from app.exceptions import TodoNotFoundError
+from app.models.todo import TodoBase, TodoCreate, TodoModel, TodoResponse, TodoUpdate
 
 
 class TodoService:
-    def __init__(self, db: AbstractedDb):
+    def __init__(self, db: Session):
         self.db = db
 
     def get_all_todos(self) -> List[TodoResponse]:
         # Returns list of TodoResponse
-        return self.db.get_all()
+        todos = self.db.query(TodoModel).all()
+        return [self._to_response(todo) for todo in todos]
 
     def get_todo_by_id(self, todo_id: UUID) -> TodoResponse:
-        return self.db.get_by_id(todo_id=todo_id)
+        """Get an existing todo by id"""
+        todo = self.db.query(TodoModel).filter_by(id=todo_id).first()
+        if not todo:
+            raise TodoNotFoundError(todo_id)
+        return self._to_response(todo)
 
     def create_todo(self, todo_data: TodoCreate) -> TodoResponse:
-        # todo_data is a Pydantic model which acts as the form
-        # Access fields: todo_data.title, todo_data.description
-        # returns the created TodoResponse
-        new_todo = self.db.create(todo_data, todo_id=uuid4())
-        return new_todo
+        """Create a new todo"""
+        new_todo = TodoModel(
+            id=uuid4(),
+            created_at=datetime.now(),
+            updated_at=datetime.now(),
+            **todo_data.model_dump(),
+        )
+        self.db.add(new_todo)
+        self.db.commit()
+        self.db.refresh(new_todo)
+        return self._to_response(new_todo)
 
     def update_todo(
         self, todo_id: UUID, todo_data: TodoUpdate
     ) -> Optional[TodoResponse]:
-        updated_todo = self.db.update(todo_data=todo_data, todo_id=todo_id)
-        return updated_todo
+        """Update an existing todo"""
+        existing_todo = self.db.query(TodoModel).filter_by(id=todo_id).first()
+        if not existing_todo:
+            raise TodoNotFoundError(todo_id)
+
+        for key, value in todo_data.model_dump(exclude_unset=True):
+            setattr(existing_todo, key, value)
+
+        self.db.commit()
+        self.db.refresh(existing_todo)
+        return self._to_response(existing_todo)
 
     def delete_todo(self, todo_id: UUID) -> bool:
-        success = self.db.delete(todo_id=todo_id)
-        return success
+        """Delete a todo"""
+        existing_todo = self.db.query(TodoModel).filter_by(id=todo_id).first()
+        if not existing_todo:
+            raise TodoNotFoundError(todo_id)
+
+        self.db.delete(existing_todo)
+        self.db.commit()
+        return True
+
+    @staticmethod
+    def _to_response(todo: TodoModel) -> TodoResponse:
+        """Convert SQLAlchemy model to Pydantic response model"""
+        return TodoResponse(
+            id=todo.id,
+            title=todo.title,
+            description=todo.description,
+            completed=todo.completed,
+            created_at=todo.created_at,
+            updated_at=todo.updated_at,
+        )

@@ -8,3 +8,6 @@ To deactivate env
 
 To start the server
 # fastapi dev main.py  
+
+If cloning for the first time, must create db locally
+# createdb todos_db

@@ -1,4 +1,10 @@
-from typing import Union
+from dotenv import load_dotenv
+
+load_dotenv()
+
+from contextlib import asynccontextmanager
+
+from app.db.config import Base, engine
 
 from fastapi import FastAPI, Request
 from starlette.responses import JSONResponse
@@ -6,7 +12,29 @@ from starlette.responses import JSONResponse
 from app.exceptions import TodoNotFoundError
 from app.routers import todos
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Lifespan events for the application.
+    Code before yield runs on startup.
+    Code after yield runs on shutdown.
+    """
+    # Startup
+    print("Starting up...")
+    Base.metadata.create_all(bind=engine)
+    print("Database tables created successfully")
+
+    yield  # App runs here
+
+    # Shutdown
+    print("Shutting down...")
+    engine.dispose()
+    print("Database connections closed")
+
+
+# Create FastAPI app with lifespan
+app = FastAPI(lifespan=lifespan)
 
 app.include_router(todos.router)
 
@@ -26,4 +54,4 @@ async def value_error_handler(request: Request, exc: ValueError):
 
 @app.get("/")
 def read_root():
-    return {"Hello": "World"}
+    return {"Server": "Running"}

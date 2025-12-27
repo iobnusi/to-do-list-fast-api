@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 
 from app.exceptions import TodoNotFoundError
-from app.routers import todos
+from app.routers import auth, todos
 
 
 @asynccontextmanager
@@ -47,6 +47,7 @@ app.add_middleware(
 )
 
 app.include_router(todos.router)
+app.include_router(auth.router)
 
 
 @app.exception_handler(TodoNotFoundError)

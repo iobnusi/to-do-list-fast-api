@@ -1,12 +1,11 @@
 from datetime import datetime
 from typing import List, Optional
 from uuid import UUID, uuid4
-import uuid
 
 from sqlalchemy.orm import Session
 
 from app.exceptions import TodoNotFoundError
-from app.models.todo import TodoBase, TodoCreate, TodoModel, TodoResponse, TodoUpdate
+from app.models.todo import TodoCreate, TodoModel, TodoResponse, TodoUpdate
 
 
 class TodoService:

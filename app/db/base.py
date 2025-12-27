@@ -15,7 +15,7 @@ class AbstractedDb(ABC):
         pass
 
     @abstractmethod
-    def get_by_id(self, todo_id: UUID) -> Optional[TodoResponse]:
+    def get_by_id(self, todo_id: UUID) -> TodoResponse:
         """Get a single todo by ID"""
         pass
 
@@ -29,7 +29,7 @@ class AbstractedDb(ABC):
         """Update an existing todo"""
         pass
 
-    # @abstractmethod
-    # def delete(self, todo_id: UUID) -> bool:
-    #     """Delete a todo"""
-    #     pass
+    @abstractmethod
+    def delete(self, todo_id: UUID) -> bool:
+        """Delete a todo"""
+        pass

@@ -13,7 +13,12 @@ class InMemoryDb(AbstractedDb):
         return self.todos
 
     def get_by_id(self, todo_id):
-        return None
+        """Get an existing todo by id"""
+        for i, todo in enumerate(self.todos):
+            if todo.id == todo_id:
+                return todo
+
+        raise TodoNotFoundError(todo_id)
 
     def create(self, todo_data, todo_id):
         """Create a new todo"""
@@ -32,7 +37,6 @@ class InMemoryDb(AbstractedDb):
             if todo.id == todo_id:
                 update_data = todo_data.model_dump(exclude_unset=True)
 
-                print(f"Founf todo with id {todo_id}")
                 new_data = TodoResponse(
                     id=todo_id,
                     created_at=todo.created_at,
@@ -44,5 +48,14 @@ class InMemoryDb(AbstractedDb):
                 self.todos[i] = new_data
 
                 return new_data
+
+        raise TodoNotFoundError(todo_id)
+
+    def delete(self, todo_id) -> bool:
+        """Delete a todo"""
+        for i, todo in enumerate(self.todos):
+            if todo.id == todo_id:
+                self.todos.pop(i)
+                return True
 
         raise TodoNotFoundError(todo_id)

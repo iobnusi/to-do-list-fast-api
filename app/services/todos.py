@@ -15,8 +15,8 @@ class TodoService:
         # Returns list of TodoResponse
         return self.db.get_all()
 
-    # def get_todo(self, todo_id: UUID) -> Optional[TodoResponse]:
-    #     # Returns TodoResponse or None
+    def get_todo_by_id(self, todo_id: UUID) -> TodoResponse:
+        return self.db.get_by_id(todo_id=todo_id)
 
     def create_todo(self, todo_data: TodoCreate) -> TodoResponse:
         # todo_data is a Pydantic model which acts as the form
@@ -31,6 +31,6 @@ class TodoService:
         updated_todo = self.db.update(todo_data=todo_data, todo_id=todo_id)
         return updated_todo
 
-
-# def delete_todo(self, todo_id: int) -> bool:
-#     pass
+    def delete_todo(self, todo_id: UUID) -> bool:
+        success = self.db.delete(todo_id=todo_id)
+        return success

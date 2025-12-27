@@ -17,6 +17,11 @@ def get_all_todos(todo_service: TodoService = Depends(get_todo_service)):
     return todo_service.get_all_todos()
 
 
+@router.get("/{todo_id}", response_model=TodoResponse)
+def get_all_todos(todo_id: UUID, todo_service: TodoService = Depends(get_todo_service)):
+    return todo_service.get_todo_by_id(todo_id=todo_id)
+
+
 @router.post("/create", response_model=TodoResponse)
 def create_todo(
     todo: TodoCreate, todo_service: TodoService = Depends(get_todo_service)
@@ -31,3 +36,11 @@ def update_todo(
     todo_service: TodoService = Depends(get_todo_service),
 ):
     return todo_service.update_todo(todo_id=todo_id, todo_data=todo)
+
+
+@router.delete("/{todo_id}", response_model=bool)
+def update_todo(
+    todo_id: UUID,
+    todo_service: TodoService = Depends(get_todo_service),
+):
+    return todo_service.delete_todo(todo_id=todo_id)

@@ -14,10 +14,10 @@ class AbstractedDb(ABC):
         """Get all todos"""
         pass
 
-    # @abstractmethod
-    # def get_by_id(self, todo_id: UUID) -> Optional[TodoResponse]:
-    #     """Get a single todo by ID"""
-    #     pass
+    @abstractmethod
+    def get_by_id(self, todo_id: UUID) -> Optional[TodoResponse]:
+        """Get a single todo by ID"""
+        pass
 
     @abstractmethod
     def create(self, todo_data: TodoCreate, todo_id: UUID) -> TodoResponse:

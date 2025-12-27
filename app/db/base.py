@@ -24,10 +24,10 @@ class AbstractedDb(ABC):
         """Create a new todo"""
         pass
 
-    # @abstractmethod
-    # def update(self, todo_data: TodoUpdate, todo_id: UUID) -> TodoResponse:
-    #     """Update an existing todo"""
-    #     pass
+    @abstractmethod
+    def update(self, todo_data: TodoUpdate, todo_id: UUID) -> TodoResponse:
+        """Update an existing todo"""
+        pass
 
     # @abstractmethod
     # def delete(self, todo_id: UUID) -> bool:

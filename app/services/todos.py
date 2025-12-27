@@ -4,7 +4,7 @@ from uuid import UUID, uuid4
 import uuid
 
 from app.db.base import AbstractedDb
-from app.models.todo import TodoBase, TodoCreate, TodoResponse
+from app.models.todo import TodoBase, TodoCreate, TodoResponse, TodoUpdate
 
 
 class TodoService:
@@ -25,9 +25,11 @@ class TodoService:
         new_todo = self.db.create(todo_data, todo_id=uuid4())
         return new_todo
 
-
-# def update_todo(self, todo_id: int, todo_data: TodoUpdate) -> Optional[TodoResponse]:
-#     pass
+    def update_todo(
+        self, todo_id: UUID, todo_data: TodoUpdate
+    ) -> Optional[TodoResponse]:
+        updated_todo = self.db.update(todo_data=todo_data, todo_id=todo_id)
+        return updated_todo
 
 
 # def delete_todo(self, todo_id: int) -> bool:

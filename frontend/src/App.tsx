@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 import type { Todo, TodoCreate } from './types/todo';
-import { getTodos, createTodo, updateTodo, deleteTodo } from './services/api';
+import { getTodos, createTodo, updateTodo, deleteTodo, getToken, removeToken } from './services/api';
+import Auth from './Auth';
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [todos, setTodos] = useState<Todo[]>([]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -11,8 +13,24 @@ function App() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetchTodos();
+    // Check if user is already logged in
+    const token = getToken();
+    if (token) {
+      setIsAuthenticated(true);
+      fetchTodos();
+    }
   }, []);
+
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+    fetchTodos();
+  };
+
+  const handleLogout = () => {
+    removeToken();
+    setIsAuthenticated(false);
+    setTodos([]);
+  };
 
   const fetchTodos = async () => {
     try {
@@ -22,6 +40,10 @@ function App() {
       setError('');
     } catch (err) {
       setError('Failed to load todos');
+      // If unauthorized, logout
+      if (err instanceof Error && err.message.includes('401')) {
+        handleLogout();
+      }
     } finally {
       setLoading(false);
     }
@@ -68,9 +90,18 @@ function App() {
     }
   };
 
+  if (!isAuthenticated) {
+    return <Auth onLogin={handleLogin} />;
+  }
+
   return (
     <div className="container">
-      <h1>To-Do List</h1>
+      <div className="header">
+        <h1>To-Do List</h1>
+        <button onClick={handleLogout} className="btn-logout">
+          Logout
+        </button>
+      </div>
 
       {error && <div className="error">{error}</div>}
 

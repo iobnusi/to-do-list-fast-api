@@ -4,8 +4,27 @@
   padding: 20px;
 }
 
-h1 {
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 20px;
+}
+
+h1 {
+  margin: 0;
+}
+
+.btn-logout {
+  padding: 6px 12px;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-logout:hover {
+  background-color: #5a6268;
 }
 
 .error {

@@ -21,7 +21,7 @@ def get_auth_service(db: Session = Depends(get_db)) -> AuthService:
 
 def get_current_user(
     token: str = Depends(oauth2_scheme), auth_service=Depends(get_auth_service)
-) -> Optional[UserModel]:
+) -> UserModel:
     """Gets the current logged in user"""
     # Get the user id by verifying access token
     user_id = verify_access_token(token)

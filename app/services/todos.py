@@ -12,22 +12,23 @@ class TodoService:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_all_todos(self) -> List[TodoResponse]:
-        # Returns list of TodoResponse
-        todos = self.db.query(TodoModel).all()
+    def get_all_todos(self, user_id: UUID) -> List[TodoResponse]:
+        # Returns list of TodoResponse that is owned by user_id
+        todos = self.db.query(TodoModel).filter_by(user_id=user_id).all()
         return [self._to_response(todo) for todo in todos]
 
-    def get_todo_by_id(self, todo_id: UUID) -> TodoResponse:
+    def get_todo_by_id(self, todo_id: UUID, user_id: UUID) -> TodoResponse:
         """Get an existing todo by id"""
-        todo = self.db.query(TodoModel).filter_by(id=todo_id).first()
+        todo = self.db.query(TodoModel).filter_by(user_id=user_id, id=todo_id).first()
         if not todo:
             raise TodoNotFoundError(todo_id)
         return self._to_response(todo)
 
-    def create_todo(self, todo_data: TodoCreate) -> TodoResponse:
+    def create_todo(self, todo_data: TodoCreate, user_id: UUID) -> TodoResponse:
         """Create a new todo"""
         new_todo = TodoModel(
             id=uuid4(),
+            user_id=user_id,
             created_at=datetime.now(),
             updated_at=datetime.now(),
             **todo_data.model_dump(),
@@ -38,10 +39,12 @@ class TodoService:
         return self._to_response(new_todo)
 
     def update_todo(
-        self, todo_id: UUID, todo_data: TodoUpdate
+        self, todo_id: UUID, todo_data: TodoUpdate, user_id: UUID
     ) -> Optional[TodoResponse]:
         """Update an existing todo"""
-        existing_todo = self.db.query(TodoModel).filter_by(id=todo_id).first()
+        existing_todo = (
+            self.db.query(TodoModel).filter_by(user_id=user_id, id=todo_id).first()
+        )
         if not existing_todo:
             raise TodoNotFoundError(todo_id)
 
@@ -52,9 +55,11 @@ class TodoService:
         self.db.refresh(existing_todo)
         return self._to_response(existing_todo)
 
-    def delete_todo(self, todo_id: UUID) -> bool:
+    def delete_todo(self, todo_id: UUID, user_id: UUID) -> bool:
         """Delete a todo"""
-        existing_todo = self.db.query(TodoModel).filter_by(id=todo_id).first()
+        existing_todo = (
+            self.db.query(TodoModel).filter_by(user_id=user_id, id=todo_id).first()
+        )
         if not existing_todo:
             raise TodoNotFoundError(todo_id)
 
@@ -67,6 +72,7 @@ class TodoService:
         """Convert SQLAlchemy model to Pydantic response model"""
         return TodoResponse(
             id=todo.id,
+            user_id=todo.user_id,
             title=todo.title,
             description=todo.description,
             completed=todo.completed,

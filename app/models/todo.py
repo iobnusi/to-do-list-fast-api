@@ -4,7 +4,7 @@ from uuid import UUID, uuid4
 import uuid
 from sqlalchemy.dialects.postgresql import UUID as UUIDPSG
 from pydantic import BaseModel, Field
-from sqlalchemy import Column
+from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.types import Boolean, DateTime, String
 
@@ -19,6 +19,7 @@ class TodoBase(BaseModel):
 
 class TodoResponse(TodoBase):
     id: UUID
+    user_id: UUID
     created_at: datetime
     updated_at: datetime
 
@@ -37,6 +38,9 @@ class TodoModel(Base):
     __tablename__ = "todos"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    user_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
     title: Mapped[str] = mapped_column(String(100))
     description: Mapped[Optional[str]] = mapped_column(String(500))
     completed: Mapped[bool] = mapped_column(default=False)
